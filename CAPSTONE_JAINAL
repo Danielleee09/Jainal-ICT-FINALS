@@ -1,0 +1,75 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy import stats
+import statsmodels.api as sm
+
+
+df = pd.read_csv('employment_08_09.csv')
+
+
+print("Initial Data Preview:")
+print(df.head())
+print("\nData Information:")
+print(df.info())
+
+
+df_clean = df.dropna()
+print("\nNumber of Data Points After Cleaning:", df_clean.shape[0])
+
+
+df_clean = df_clean.reset_index(drop=True)
+
+
+print("\nNumPy Operations:")
+numeric_cols = df_clean.select_dtypes(include=[np.number]).columns
+
+
+print("Mean:", np.mean(df_clean[numeric_cols[0]]))
+
+
+print("Median:", np.median(df_clean[numeric_cols[0]]))
+
+
+print("Std Dev:", np.std(df_clean[numeric_cols[0]]))
+
+
+print("Max:", np.max(df_clean[numeric_cols[0]]))
+
+
+print("Min:", np.min(df_clean[numeric_cols[0]]))
+
+
+print("\nSciPy Pearson Correlation:")
+col1, col2 = numeric_cols[:2]  # Choose two numeric columns
+pearson_corr, _ = stats.pearsonr(df_clean[col1], df_clean[col2])
+print(f"Pearson correlation between {col1} and {col2}: {pearson_corr:.3f}")
+
+
+print("\nStatsmodels - Simple Linear Regression:")
+X = sm.add_constant(df_clean[col1])
+model = sm.OLS(df_clean[col2], X).fit()
+print(model.summary())
+
+
+sns.set(style="whitegrid")
+
+
+plt.figure(figsize=(8, 5))
+sns.histplot(df_clean[numeric_cols[0]], kde=True)
+plt.title(f'Histogram of {numeric_cols[0]}')
+plt.show()
+
+
+plt.figure(figsize=(8, 5))
+sns.boxplot(data=df_clean[numeric_cols])
+plt.title('Boxplot of Numeric Columns')
+plt.xticks(rotation=45)
+plt.show()
+
+
+plt.figure(figsize=(8, 5))
+sns.regplot(x=col1, y=col2, data=df_clean, line_kws={"color": "red"})
+plt.title(f'Regression Plot: {col1} vs {col2}')
+plt.show()
